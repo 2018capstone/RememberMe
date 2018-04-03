@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+<script type="text/javascript">
+	var domain = window.location.host;
+	var domainAll = domain.split('.');
+	var domainNum = domainAll.length-1;
+	var domainName;
+	if(domainAll[domainNum]=="com"||domainAll[domainNum]=="net"||domainAll[domainNum]=="biz")
+		domainName=domainAll[domainNum-1];
+	else
+		domainName=domainAll[domainNum-2];
+
+</script>
+</body>
+</html>
