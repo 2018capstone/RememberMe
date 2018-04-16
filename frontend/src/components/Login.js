@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import { loginCancel } from '../store/action.js';
 import contactapi from '../contactapi.js';
 import './Login.css';
@@ -36,7 +37,7 @@ class Login extends Component {
         contactapi.login(this.state.id, this.state.password)
         .then((res) => {
             if(res.data.error == "true") {
-                return alert("res.data.words");
+                return alert(res.data.words);
             }
             else {
                 const user = {
@@ -44,6 +45,8 @@ class Login extends Component {
                     email: res.data.email
                 }
                 window.sessionStorage.user = JSON.stringify(user);
+                window.location.reload(false);
+                return alert("로그인 되었습니다!");
             }
         })
     }

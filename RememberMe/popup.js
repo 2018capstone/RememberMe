@@ -1,7 +1,8 @@
 //화면이 열리면 실행되는 함수입니다.
-onload = function() {
+window.onload = function() {
     //각 엘리먼트를 전부 미리 받아오는 부분
-    const httpreq = new XMLHttpRequest();
+    let httpreq = new XMLHttpRequest();
+
     const loginpage = document.getElementById("loginPage");
     const signinpage = document.getElementById("signinPage");
     const logincancel = document.getElementById("logincancel");
@@ -17,6 +18,35 @@ onload = function() {
     const signinemailrepeat = document.getElementById("signinemailrepeat");
     const loginmessage = document.getElementById("loginmessage");
     const signinmessage = document.getElementById("signinmessage");
+    const loginbutton = document.getElementById("loginbutton");
+    const logoutbutton = document.getElementById("logoutbutton");
+    const insert = this.document.getElementById("insert");
+    const text = this.document.getElementById("text");
+
+    const test = document.getElementById("test");
+
+    chrome.storage.sync.get(["id", "email"], function(result) {
+        if(result.id || result.email) {
+            test.innerText = "id: " + result.id + ", email: " + result.email; 
+            hi.innerText = result.id + "님, 안녕하세요!";
+            loginbutton.style.display = "none";
+            logoutbutton.style.display = "inline";
+            insert.style.display = "inline";
+            text.style.display = "none"
+        }
+        else {
+            logoutbutton.style.display = "none";
+            loginbutton.style.display = "inline";
+            insert.style.display = "none";
+            text.style.display = "inline"
+        }
+    });
+
+    //로그아웃 관련 버튼설정
+    logoutbutton.onclick = function() {
+        chrome.storage.sync.remove(["id", "email"], function() {});
+        return location.reload();
+    }
 
     //로그인관련 서버의 응답을 받는 부분
     const getLoginData = function() {
@@ -26,11 +56,11 @@ onload = function() {
                 if(jsondata.error == "true") {
                     return loginmessage.innerText = jsondata.words;
                 }
-                chrome.storage.sync.set({ "rememberid": jsondata.id }, function() {
-                    console.log("id is " + id);
+                chrome.storage.sync.set({ "id": jsondata.id }, function() {
+                    console.log("id is " + jsondata.id);
                 });
-                chrome.storage.sync.set({ "rememberpassword": jsondata.password }, function() {
-                    console.log("password is " + password);
+                chrome.storage.sync.set({ "email": jsondata.email }, function() {
+                    console.log("email is " + jsondata.email);
                 });
                 location.reload();
             } else {
@@ -47,6 +77,7 @@ onload = function() {
                 if(jsondata.error == "true") {
                     return signinmessage.innerText = jsondata.words;
                 }
+                test.innerText = "회원가입 완료, 로그인 해주세요!";
                 location.reload();
             } else {
                 return signinmessage.innerText = "서버와 통신중 문제가 발생했습니다. 다시 시도해 주세요."
@@ -76,30 +107,40 @@ onload = function() {
         if(loginid.valus == "" || loginpassword.value == "") {
             return loginmessage.innerText = "정보를 모두 입력해 주세요.";
         }
-        const formdata = new FormData();
-        formdata.append("id", loginid.value);
-        formdata.append("password", loginpassword.value);
+        const data = {
+            id: loginid.value,
+            password: loginpassword.value
+        }
         httpreq.onreadystatechange = getLoginData;
         httpreq.open("POST", "http://localhost:3000/api/login/", true);
-        httpreq.send(formdata);
+        httpreq.onload = function(data) {
+            console.log('loaded', this.responseText);
+        };
+        httpreq.setRequestHeader('Content-Type', 'application/json');
+        httpreq.send(JSON.stringify(data));
     }
 
     signinsubmit.onclick = function() {
-        const formdata = new FormData();
-        if(!signinid.value || !signinpassword.value || !signinpasswordrepeat.value || !signinemail.value || !signinemailrepeat.valeu) {
+        if(!signinid.value || !signinpassword.value || !signinpasswordrepeat.value || !signinemail.value || !signinemailrepeat.value) {
             return signinmessage.innerText = "정보를 모두 입력해 주세요.";
         }
         if(signinpassword.value !== signinpasswordrepeat.value) {
-            signinmessage.innerText = "비밀번호와 확인이 서로 다릅니다. 비밀번호를 확인하세요."
+            return signinmessage.innerText = "비밀번호와 확인이 서로 다릅니다. 비밀번호를 확인하세요."
         }
         if(signinemail.value !== signinemailrepeat.value) {
-            signinmessage.innerText = "이메일과 확인이 서로 다릅니다. "
+            return signinmessage.innerText = "이메일과 확인이 서로 다릅니다. "
         }
-        formdata.append("id", signinid.value);
-        formdata.append("password", signinpassword.value);
-        formdata.append("email", signinemail.value);
-        httpreq.onreadystatechange = getLoginData;
-        httpreq.open("POST", "http://localhost:3000/api/signin/", true);
-        httpreq.send(formdata);
+        const data = {
+            id: signinid.value,
+            password: signinpassword.value,
+            email: signinemail.value
+        }
+        httpreq.onreadystatechange = getSigninData;
+        httpreq.open("POST", "http://localhost:3000/api/signup/", true);
+        httpreq.onload = function(data) {
+            console.log('loaded', this.responseText);
+        };
+        httpreq.setRequestHeader('Content-Type', 'application/json');
+        httpreq.send(JSON.stringify(data));
     }
 }

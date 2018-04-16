@@ -32,6 +32,30 @@ RememberMe는 구글 익스텐션 기반으로 동작하는 사용자의 로그�
 
 __04/02 월요일:__ input테그에 값을 자동으로 입력하는 것이 문제가 된다. 왜냐하면 각 input테그마다 name과 id등 설정이 개발자에 따라서 다르기 때문이다. 하지만 만약 로그인 정보를 저장할 때 input테그의 정보까지 같이 저장해서 불러올 때 사용할 수 있다면 어떨까? 예를들어 name필드의 값을 계정정보와 같이 저장하여 사용한다면? 시도해볼 가치가 있어보인다.  
 
+__04/03 화요일:__ url에서 특정 도메인 이름만 빼오는 함수이다.  
+~~~javascript
+function myFunction(string) {
+    var str = string;
+    var res = str.split("/");
+    if(res[0] == "https:" || res[0] == "http:") {
+        res.splice(0, 2);
+        res.splice(1, 100);
+    }
+    else {
+    	res.splice(1, 100);
+    }
+    var laststring = res[0].split(".");
+    if(laststring.length > 2) {
+    	laststring.splice(0, 1);
+    }
+    return laststring[0];
+}
+~~~  
+
+__04/05 목요일:__ 1안. focus된 input테그에 값을 넣도록 하는 것은 어떤가 하는 의견을 교수님으로부터 받았다. autofocus가 아니면 자동으로 값이 들어갈지 시도해볼 필요가 있다. 2안. 대부분의 POST요청은 form으로 구성된 input을 통해 발생한다. 그렇다면 form테그를 찾아서 그 자식테그인 input에 값을 넣도록 하면 어떨까 싶다.  
+
+__04/08 일요일:__ 위에서 얘기했던 form을 서치해서 input값을 넣는 시도가 성공했다. 물론 모든 로그인에 대해서 반응하는 건 아닌데, 특히 구글과 같은 순차적인 로그인 시도에 대해서는 반응하지 못한다. 비밀번호를 입력하는 부분은 가능하지만 이외의 다른 부분이 과연 이메일인지 ID인지 구분하기가 쉽지 않다.  
+
 ## 현재 모습
 
 ### __초기모습__  
@@ -39,6 +63,13 @@ __04/02 월요일:__ input테그에 값을 자동으로 입력하는 것이 문�
 
 ### __04/03 화요일__  
 ![show](https://postfiles.pstatic.net/MjAxODA0MDNfMzYg/MDAxNTIyNzIyNjI4NzM1.3qxmw1fvUXhWzLvrDdDzQX1AC6dASZX-sbMLtA0N-zkg.1LyqwSIO-AXmsd5U0YV-tBMtJZpG71_f65T4zWe3Nlog.PNG.ninanung/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7_2018-04-03_%EC%98%A4%EC%A0%84_11.28.26.png?type=w773)  
+
+### __04/10 화요일__
+<img src="https://github.com/ninanung/RememberMe/blob/master/gifs/2018-04-10.gif?raw=true" width="400px" height="400px" />  
+
+### __04/16 월요일__
+같은 아이디와 비밀번호로 로그인이 가능하다. DB를 공유하고 있기 때문.  
+<img src="https://github.com/ninanung/RememberMe/blob/master/gifs/2018-04-16 17.18.51.gif?raw=true" width="400px" height="700px" />  
 
 ## 사용된 것들
 
