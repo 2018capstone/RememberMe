@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user.js");
+const crypt = require("./cryption.js");
 
 router.post("/", function(req, res, next) {
-    console.log("url=" + req.body.url + " / id=" + req.body.id);
+    console.log("getting one account");
     const url = req.body.url;
-    const id = req.body.id;
+    const id = crypt.decryption(req.body.id);
     let info = {
         error: "false",
         words: "",
@@ -33,7 +34,6 @@ router.post("/", function(req, res, next) {
             info.error = "true";
             info.words = "해당 페이지에는 저장된 계정이 없습니다."
         }
-        console.log(info);
         return res.send(info);
     })
 });
