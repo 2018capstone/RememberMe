@@ -1,3 +1,101 @@
+const alpha = [
+    "a","b","c","d","e","f","g","h","i","j",'k','l','m','n','o','p','q','r','s','t','u','v','w','x','y',"z",
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+    '1','2','3','4','5','6','7','8','9','0',
+    '`','~','!','@','#','$','%','^','&','*','(',')','-','_','=','+','[',']','{','}',"\\",'|',";",":","\'",'\"',',','<','.','>','/','?',
+];
+const crypt = [
+    '1qm','34e','91s','bnx','j8s','puq','i09','bnz','xm2','4b2','952','xnt','al1','cba','iop','1bv','56m','7r3','s09','234','sa1','2v8','s98','rtx','lkj','h23',
+    '!QM','#$E','(!S','BNX','J*S','PUQ','I)(','BNZ','XM@','$B@','(%@','XNT','AL!','CBA','IOP','!BV','%^M','&R#','S)(','@#$','SA!','@V*','S(*','RTX','LKJ','H@#',
+    'w2n','br5','09w','1w6','htm','10s','20e','zv7','7m1','ny9',
+    "f8w","4dk","efv","40d","1ks","5gm","zc8","00e","2g2","kg2","tx6","jsj","wv3","48u","2t8","678","bhc","pta","gt2","eta","5v6","yt7","1dg","3u7","48e","k0j","seo","fn7","mg4","2sd","3r4","rp7",
+];
+
+const cryption = {
+    encryption: function(string) {
+        let res = string.replace(/ /gi, "").split("").toString().replace(/,/gi, "").split("");
+        for(let i = 0; i < res.length; i++) {
+            for(let k = 0; k < alpha.length; k++) {
+                if(res[i] === alpha[k]) {
+                    res.splice(i, 1, crypt[k]);
+                    k = alpha.length + 1;
+                }
+            }
+        }
+        const str = res.toString().replace(/,/gi, "");
+        return str;
+    },
+    decryption: function(string) {
+        let count = 0;
+        let res = string.split("");
+        for(let i = 0; i < res.length; i++) {
+            if(i !== 0 && i%3 === 0) {
+                res.splice(i+count, 0, "/");
+                count++;
+            }
+        }
+        res = res.toString().replace(/,/gi, "").split("/");
+        for(let j = 0; j < res.length; j++) {
+            for(let k = 0; k < alpha.length; k++) {
+                if(res[j] === crypt[k]) {
+                    res.splice(j, 1, alpha[k]);
+                    k = alpha.length + 1;
+                }
+            }
+        }
+        const str = res.toString().replace(/,/gi, "");
+        return str;
+    }
+}
+
+const check = {
+    checkWhiteSpace: function(string) {
+        const white = /\s/;
+        if(white.test(string)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
+    checkBlockSomeSpecioal: function(string) {
+        const special = /[,\/]/;
+        if(special.test(string)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
+    checkKorean: function(string) {
+        const korean = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+        if(korean.test(string)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
+    checkUpperDigit: function(string) {
+        const upper = /[A-Z]/;
+        if(upper.test(string)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    },
+    checkSpecial: function(string) {
+        const special = /[!@#$%^&*()\-_=+\\\/\[\]{};:\'",.<>\/?|`~]/;
+        if(special.test(string)) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+}
+
 //화면이 열리면 실행되는 함수입니다.
 window.onload = function() {
     //각 엘리먼트를 전부 미리 받아오는 부분
@@ -34,10 +132,10 @@ window.onload = function() {
 
     const test = document.getElementById("test");
 
-    chrome.storage.sync.get(["words", "id"], function(result) {
+    chrome.storage.sync.get(["words", "id", "RememberID", "RememberPassword"], function(result) {
         if(result.id) {
             if(result.words) {
-                insertmessage.innerText = result.words;
+                insertmessage.innerText = result.words + "\nID: " + result.RememberID + ", PW: " + result.RememberPassword;
             }
             else {
                 insertmessage.innerText = "새로고침을 한번 해주세요."
@@ -94,10 +192,10 @@ window.onload = function() {
                 if(jsondata.error == "true") {
                     return loginmessage.innerText = jsondata.words;
                 }
-                chrome.storage.sync.set({ "id": jsondata.id }, function() {
+                chrome.storage.sync.set({ "id": cryption.decryption(jsondata.id) }, function() {
                     console.log("id is " + jsondata.id);
                 });
-                chrome.storage.sync.set({ "email": jsondata.email }, function() {
+                chrome.storage.sync.set({ "email": cryption.decryption(jsondata.email) }, function() {
                     console.log("email is " + jsondata.email);
                 });
                 location.reload();
@@ -157,10 +255,10 @@ window.onload = function() {
     insertmodalsubmit.onclick = function() {
         chrome.storage.sync.get(["id", "url"], function(result) {
             const data = {
-                url: result.url,
-                id: result.id,
-                insertid: insertid.value,
-                insertpassword: insertpassword.value
+                url: cryption.encryption(result.url),
+                id: cryption.encryption(result.id),
+                insertid: cryption.encryption(insertid.value),
+                insertpassword: cryption.encryption(insertpassword.value)
             }
             httpreq.onreadystatechange = getInsertData;
             httpreq.open("POST", "http://localhost:3000/api/insert/", true);
@@ -178,8 +276,8 @@ window.onload = function() {
             return loginmessage.innerText = "정보를 모두 입력해 주세요.";
         }
         const data = {
-            id: loginid.value,
-            password: loginpassword.value
+            id: cryption.encryption(loginid.value),
+            password: cryption.encryption(loginpassword.value)
         }
         httpreq.onreadystatechange = getLoginData;
         httpreq.open("POST", "http://localhost:3000/api/login/", true);
@@ -194,6 +292,22 @@ window.onload = function() {
         if(!signinid.value || !signinpassword.value || !signinpasswordrepeat.value || !signinemail.value || !signinemailrepeat.value) {
             return signinmessage.innerText = "정보를 모두 입력해 주세요.";
         }
+        else if(signinid.value.length < 4 || signinid.value.length > 10) {
+            signinid.value = null;
+            return signinmessage.innerText = "아이디가 너무 짧거나 깁니다.";
+        }
+        else if(check.checkKorean(signinid.value) || check.checkKorean(signinpassword.value) || check.checkKorean(signinemail.value)) {
+            return signinmessage.innerText = "아이디와 비밀번호, 이메일에는 한글을 사용하실 수 없습니다.";
+        }
+        else if(check.checkBlockSomeSpecioal(signinid.value) || check.checkBlockSomeSpecioal(signinpassword.value) || check.checkBlockSomeSpecioal(signinemail.value)) {
+            return signinmessage.innerText = "특수문자 ','와 '/'는 계정생성에 사용하실 수 없습니다.";
+        }
+        else if(check.checkSpecial(signinid.value)) {
+            return signinmessage.innerText = "아이디에는 특수문자를 사용하실 수 없습니다.";
+        }
+        else if(check.checkWhiteSpace(signinid.value) || check.checkWhiteSpace(signinpassword.value) || check.checkWhiteSpace(signinemail.value)) {
+            return signinmessage.innerText = "아이디와 비밀번호, 이메일에는 띄어쓰기를 사용하실 수 없습니다.";
+        }
         if(signinpassword.value !== signinpasswordrepeat.value) {
             return signinmessage.innerText = "비밀번호와 확인이 서로 다릅니다. 비밀번호를 확인하세요."
         }
@@ -201,9 +315,9 @@ window.onload = function() {
             return signinmessage.innerText = "이메일과 확인이 서로 다릅니다. "
         }
         const data = {
-            id: signinid.value,
-            password: signinpassword.value,
-            email: signinemail.value
+            id: cryption.encryption(signinid.value),
+            password: cryption.encryption(signinpassword.value),
+            email: cryption.encryption(signinemail.value)
         }
         httpreq.onreadystatechange = getSigninData;
         httpreq.open("POST", "http://localhost:3000/api/signup/", true);

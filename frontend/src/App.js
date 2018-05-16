@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import logo from './icon.png';
 import './App.css';
-import { loginPopup, signupPopup, loginCancel, signupCancel } from './store/action.js';
-import { Route, BrowserRouter, Link, Switch, NavLink } from 'react-router-dom';
+import { loginPopup, signupPopup, loginCancel, signupCancel, findPopup, findCancel } from './store/action.js';
+import { Route, BrowserRouter, Switch, Redirect } from 'react-router-dom';
 
 import Login from './components/Login.js';
 import Signup from './components/Signup.js';
 import Home from './components/Home.js';
 import Navi from './components/Navi.js';
-import NotFount from './components/NotFound.js';
+import NotFound from './components/NotFound.js';
 import List from './components/List.js';
 import Insert from './components/Insert.js';
 import PleaseLogin from './components/PleaseLogin.js';
+import Readme from './components/Readme.js';
+import FindAccount from './components/FindAccount.js';
+import Profile from './components/Profile.js';
 
 class App extends Component {
   constructor(props) {
@@ -21,6 +24,8 @@ class App extends Component {
     this.signupcancel = this.signupcancel.bind(this);
     this.logincancel = this.logincancel.bind(this);
     this.logout = this.logout.bind(this);
+    this.find = this.find.bind(this);
+    this.findcancel = this.findcancel.bind(this);
   }
 
   login() {
@@ -42,6 +47,17 @@ class App extends Component {
     this.props.store.dispatch(signupCancel());
     this.forceUpdate();
   }
+
+  find() {
+    this.props.store.dispatch(findPopup());
+    this.forceUpdate();
+  }
+
+  findcancel() {
+    this.props.store.dispatch(findCancel());
+    this.forceUpdate();
+  }
+
   logout() {
     window.sessionStorage.clear();
     this.forceUpdate();
@@ -58,10 +74,11 @@ class App extends Component {
             <div className="buttons">
               <button onClick={() => this.login()} className="btn btn-default button">로그인</button>
               <button onClick={() => this.signup()} className="btn btn-default button">계정생성</button>
+              <button onClick={() => this.find()} className="btn btn-default button">계정찾기</button>
             </div>
           }
           <div className="empty-div"></div>
-          <img src={logo} className="App-logo" alt="logo" />
+          <a href="/"><img src={logo} className="App-logo" alt="logo" /></a>
           <h1 className="App-title"><a href="/">RememberMe</a></h1>
         </header>
         <div className="App-body">
@@ -73,18 +90,20 @@ class App extends Component {
               <div>
                 <Switch>
                   <Route exact path="/" component={ Home }></Route>
+                  <Route exact path="/readme" component={ Readme }></Route>
                   { window.sessionStorage.getItem("Reid") ? 
                     <div>
                       <Route path="/list" component={ List }></Route>
                       <Route path="/insert" component={ Insert }></Route>
+                      <Route path="/profile" component={ Profile }></Route>
                     </div> :
                     <div>
                       <Route path="/list" component={ PleaseLogin }></Route>
                       <Route path="/insert" component={ PleaseLogin }></Route>
+                      <Route path="/profile" component={ PleaseLogin }></Route>
                     </div>
-
                   }
-                  <Route component={ NotFount }></Route>
+                  <Route path="*" exact component={ NotFound }></Route>
                 </Switch>
               </div>
             </div>
@@ -106,6 +125,7 @@ class App extends Component {
         </div>
         { this.props.store.getState().login ? <Login logincancel={this.logincancel} /> : null }
         { this.props.store.getState().signup ? <Signup signupcancel={this.signupcancel} /> : null }
+        { this.props.store.getState().find ? <FindAccount findcancel={this.findcancel}/> : null }
       </div>
     )
   }

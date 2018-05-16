@@ -17,9 +17,9 @@ let transporter = nodemailer.createTransport(smtpTransport({
 
 router.post("/", function(req, res, next) {
     console.log("someone signup");
-    const id = crypt.decryption(req.body.id);
+    const id = req.body.id;
     const password = req.body.password;
-    const email = crypt.decryption(req.body.email);
+    const email = req.body.email;
     let info = {
         error: "false",
         words: ""
@@ -36,22 +36,15 @@ router.post("/", function(req, res, next) {
             return res.send(info);
         }
         let newUser = new User({
-            id: crypt.encryption(id),
+            id: id,
             password: password,
-            email: crypt.encryption(email),
+            email: email,
         });
         newUser.save(function(err) {    
-            if(err) {
-                info.error = "true";
-                info.words = "알수없는 오류발생.";
-                console.log(err);
-                return res.send(info);
-            }
-            //이메일 발송부분
             let emailOption = {
                 from: "RememberMe <ninanung0503@gmail.com>",
-                to: email,
-                subject: "안녕하세요, " + id + "님! RememberMe를 이용해 주셔서 감사합니다!",
+                to: crypt.decryption(email),
+                subject: "안녕하세요, " + crypt.decryption(id) + "님! RememberMe를 이용해 주셔서 감사합니다!",
                 html:
                     "<h1 style='font-weight: bold; color: #997053; font-size: 40px;'>당신의 계정 지킴이, RememberMe입니다!</h1>" +
                     "<br/><h2>이용 감사드립니다.</h2>" +
@@ -62,11 +55,15 @@ router.post("/", function(req, res, next) {
                 if(error) {
                     info.error = "true";
                     info.words = "이메일 발송오류, 주소를 확인하세요.";
-                    return res.send(info);
                 }
             });
-            return res.send(info);
+            if(err) {
+                info.error = "true";
+                info.words = "알수없는 오류발생.";
+                console.log(err);
+            }
         });
+        return res.send(info);
     });
 });
 

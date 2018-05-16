@@ -2,9 +2,8 @@ import React, { Component } from 'react';
 import contactapi from '../contactapi.js';
 import crypt from '../cryption.js';
 import check from '../check.js';
-import './Signup.css';
 
-class Signup extends Component {
+class Profile extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -19,7 +18,27 @@ class Signup extends Component {
         this.passwordreChange = this.passwordreChange.bind(this);
         this.emailChange = this.emailChange.bind(this);
         this.emailreChange = this.emailreChange.bind(this);
-        this.signupPost = this.signupPost.bind(this);
+        this.profilePost = this.profilePost.bind(this);
+    }
+
+    componentDidMount() {
+        const id = document.getElementById("profile_id_input");
+        const password = document.getElementById("profile_password_input");
+        const passwordconfirm = document.getElementById("profile_password_confirm_input");
+        const email = document.getElementById("profile_email_input");
+        const emailconfirm = document.getElementById("profile_email_confirm_input");
+        id.value = sessionStorage.getItem("Reid");
+        password.value = crypt.decryption(sessionStorage.getItem("Repassword"));
+        passwordconfirm.value = crypt.decryption(sessionStorage.getItem("Repassword"));
+        email.value = sessionStorage.getItem("Reemail");
+        emailconfirm.value = sessionStorage.getItem("Reemail");
+        this.setState({
+            id: sessionStorage.getItem("Reid"),
+            password: crypt.decryption(sessionStorage.getItem("Repassword")),
+            passwordre: crypt.decryption(sessionStorage.getItem("Repassword")),
+            email: sessionStorage.getItem("Reemail"),
+            emailre: sessionStorage.getItem("Reemail")
+        })
     }
 
     idChange(e) {
@@ -72,12 +91,12 @@ class Signup extends Component {
         })
     }
 
-    signupPost() {
+    profilePost() {
         if(!this.state.id || !this.state.password || !this.state.passwordre || !this.state.email || !this.state.emailre) {
             return alert("모든 작성란을 입력하세요.");
         }
         else if(this.state.id.length < 4 || this.state.id.length > 10) {
-            const id = document.getElementById("signup_id_input");
+            const id = document.getElementById("profile_id_input");
             id.value = null;
             return alert("아이디가 너무 짧거나 깁니다.");
         }
@@ -99,49 +118,60 @@ class Signup extends Component {
         else if(this.state.email !== this.state.emailre) {
             return alert("이메일과 확인이 서로 다릅니다. 이메일을 확인해 주세요.");
         }
-        contactapi.signup(crypt.encryption(this.state.id), crypt.encryption(this.state.password), crypt.encryption(this.state.email))
+        const originid = window.sessionStorage.getItem("Reid");
+        contactapi.profile(crypt.encryption(originid), crypt.encryption(this.state.id), crypt.encryption(this.state.password), crypt.encryption(this.state.email))
         .then((res) => {
             if(res.data.error === "true") {
                 return alert(res.data.words);
             }
             else {
+                sessionStorage.setItem("Reid", crypt.decryption(res.data.id));
+                sessionStorage.setItem("Reemail", crypt.decryption(res.data.email));
+                sessionStorage.setItem("Repassword", res.data.password);
                 window.location.reload(false);
-                return alert("회원가입 완료 되었습니다. 로그인 해주세요!");
+                return alert("계정정보가 변경되었습니다!");
             }
         });
     }
 
     render() {
-        return(
-            <div className="modal">
+        return (
+            <div className="insert-body">
                 <div className="form">
-                    <h1 className="inputhead">계정생성</h1>
+                    <h1 className="inputhead">기존 프로필</h1>
+                    <h2>아이디</h2>
+                    <h3>{ sessionStorage.getItem("Reid") }</h3>
+                    <h2>비밀번호</h2>
+                    <h3>{ crypt.decryption(sessionStorage.getItem("Repassword")) }</h3>
+                    <h2>이메일</h2>
+                    <h3>{ sessionStorage.getItem("Reemail") }</h3>
+                    <br/>
+                    <h1 className="inputhead">프로필 변경</h1>
                     <hr/>
                     <div className="input">
                         <label>아이디</label>
                         <p className="warn">(!)아이디는 4글자 이상 10글자 미만으로 작성해 주세요.</p>
-                        <input id="signup_id_input" onChange={this.idChange} type="text" placeholder="ID"/>
+                        <input id="profile_id_input" onChange={this.idChange} type="text" placeholder="ID"/>
                     </div>
                     <div className="input">
                         <label>비밀번호</label>
-                        <input onChange={this.passwordChange} type="password" placeholder="Password" /> 
+                        <input id="profile_password_input" onChange={this.passwordChange} type="password" placeholder="Password" /> 
                     </div>
                     <div className="input">
                         <label>비밀번호 확인</label>
-                        <input onChange={this.passwordreChange} type="password" placeholder="Repeat Password" /> 
+                        <input id="profile_password_confirm_input" onChange={this.passwordreChange} type="password" placeholder="Repeat Password" /> 
                     </div>
                     <div className="input">
                         <label>이메일</label>
                         <p className="warn">(!)메일주소는 계정정보 분실시 확인을 위해서만 사용됩니다.</p>
-                        <input onChange={this.emailChange} type="email" placeholder="Email" />
+                        <input id="profile_email_input" onChange={this.emailChange} type="email" placeholder="Email" />
                     </div>
                     <div className="input">
                         <label>이메일 확인</label>
-                        <input onChange={this.emailreChange} type="email" placeholder="Repeat Email" />
+                        <input id="profile_email_confirm_input" onChange={this.emailreChange} type="email" placeholder="Repeat Email" />
                     </div>
                     <div className="input">
-                        <button type="button" onClick={() => this.signupPost()}>계정생성</button>
-                        <button type="button" onClick={() => this.props.signupcancel()}>취소</button>
+                        <button type="button" onClick={() => this.profilePost()}>변경</button>
                     </div>
                 </div>
             </div>
@@ -149,4 +179,4 @@ class Signup extends Component {
     }
 }
 
-export default Signup;
+export default Profile;
