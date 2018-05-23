@@ -1,4 +1,4 @@
-const DBurl = "mongodb://localhost:27017/test"
+const DBurl = "mongodb://ninanung:1004nmnm@ds016148.mlab.com:16148/rememberme"
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -17,7 +17,9 @@ const profileedit = require("./routes/profileedit.js");
 
 const app = express();
 const http = require("http").Server(app);
-mongoose.connect(DBurl);
+mongoose.connect(DBurl, {
+    useMongoClient: true
+});
 
 app.use(connectHistoryApiFallback());
 app.use(bodyParser.json());
